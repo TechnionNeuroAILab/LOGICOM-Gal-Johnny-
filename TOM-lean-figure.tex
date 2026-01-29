@@ -1,0 +1,112 @@
+% Requires: \usepackage{tikz}
+% Optional (recommended): \usetikzlibrary{arrows.meta}
+
+\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1, >=Stealth]
+
+% -------------------------
+% Styles (CogSci-friendly)
+% -------------------------
+\tikzset{
+  listnode/.style={rounded corners, draw=blue!70!black, fill=blue!8, line width=1.2pt},
+  chunknode/.style={rounded corners, draw=teal!70!black, fill=teal!8, line width=1.2pt},
+  wordnode/.style={rounded corners, draw=black!65, fill=black!4, line width=1pt},
+  semanticbox/.style={rounded corners, draw=green!55!black, fill=green!6, line width=1pt},
+  hieredge/.style={->, draw=blue!70!black, line width=1.4pt},
+  semedge/.style={->, dashed, draw=green!55!black, line width=1.1pt},
+  probtext/.style={font=\large, text=black!70},
+  dotstext/.style={font=\Huge\bfseries, text=black!70},
+  levelhdr/.style={font=\large\bfseries, text=black!85, anchor=west}
+}
+
+% -------------------------
+% Semantic component box
+% -------------------------
+\draw[semanticbox] (244,318) rectangle (1122,434);
+
+% -------------------------
+% Episodic nodes
+% -------------------------
+
+% List node
+\draw[listnode] (622,18) rectangle (742,80);
+
+% Chunk nodes
+\draw[chunknode] (383,126) rectangle (503,188);
+\draw[chunknode] (853,128) rectangle (973,190);
+
+% Word nodes
+\draw[wordnode] (244,246) rectangle (364,308);
+\draw[wordnode] (527,247) rectangle (647,309);
+\draw[wordnode] (719,248) rectangle (839,310);
+\draw[wordnode] (1000,249) rectangle (1120,311);
+
+% -------------------------
+% Hierarchy edges (list -> chunk -> word)
+% -------------------------
+
+% List -> chunks
+\draw[hieredge] (651,85) -- (510,134);
+\draw[hieredge] (711,84) -- (848,134);
+
+% Chunk -> words (left chunk)
+\draw[hieredge] (412,193) -- (327,241);
+\draw[hieredge] (474,193) -- (568,242);
+
+% Chunk -> words (right chunk)
+\draw[hieredge] (886,195) -- (801,243);
+\draw[hieredge] (948,195) -- (1042,244);
+
+% -------------------------
+% Semantic edges (within semantic component)
+% -------------------------
+\draw[semedge]
+  (311.27,328.56) .. controls (321.03,417.28) and (585.71,444.91) .. (594.8,324.69);
+
+\draw[semedge]
+  (488.03,324.06) .. controls (490.74,387.11) and (579.64,394.81) .. (594.2,325.35);
+
+\draw[semedge]
+  (795.26,324.92) .. controls (800.78,398.45) and (891.37,398.05) .. (898.66,324.59);
+
+\draw[semedge]
+  (594.96,326.88) .. controls (600.85,451.19) and (1041.51,423.31) .. (1056.99,323.6);
+
+% -------------------------
+% Text labels (nodes)
+% -------------------------
+\node at (682,49) {\Large List};
+
+\node at (443,157) {\Large Chunk \#1};
+\node at (913,159) {\Large Chunk \#C\textsubscript{1}};
+
+\node at (304,278) {\Large Word 1};
+\node at (587,279) {\Large Word 4};
+\node at (780,279) {\Large Word C\textsubscript{1}+1};
+\node at (1062,280) {\Large Word C\textsubscript{1}+4};
+
+% Dots (omitted nodes)
+\node[dotstext] at (690,135) {. . .};
+\node[dotstext] at (915,240) {. . .};
+\node[dotstext] at (440,241) {. . .};
+
+% -------------------------
+% Left-side headers
+% -------------------------
+\node[levelhdr, anchor=west] at (6,52)  {List Episodes:};
+\node[levelhdr, anchor=west] at (6,155) {Chunk Episodes:};
+\node[levelhdr, anchor=west] at (6,275) {Word Episodes:};
+\node[levelhdr, anchor=west] at (6,375) {Semantic Component:};
+
+% -------------------------
+% Probability labels (lighter)
+% -------------------------
+\node[probtext] at (570,86) {$f(1)$};
+\node[probtext] at (795,86) {$f(C_{1})$};
+
+\node[probtext] at (355,200) {$f(1)$};
+\node[probtext] at (540,200) {$f(4)$};
+
+\node[probtext] at (790,198) {$f(C_{1}+1)$};
+\node[probtext] at (1035,199) {$f(C_{1}+4)$};
+
+\end{tikzpicture}

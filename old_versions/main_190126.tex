@@ -1,0 +1,694 @@
+%%%
+%%% Annual Cognitive Science Conference
+%%% Sample LaTeX Paper -- Proceedings Format
+%%%
+
+% Original : Ashwin Ram (ashwin@cc.gatech.edu)       04/01/1994
+% Modified : Johanna Moore (jmoore@cs.pitt.edu)      03/17/1995
+% Modified : David Noelle (noelle@ucsd.edu)          03/15/1996
+% Modified : Pat Langley (langley@cs.stanford.edu)   01/26/1997
+% Latex2e corrections by Ramin Charles Nakisa        01/28/1997
+% Modified : Tina Eliassi-Rad (eliassi@cs.wisc.edu)  01/31/1998
+% Modified : Trisha Yannuzzi (trisha@ircs.upenn.edu) 12/28/1999
+% Modified : Mary Ellen Foster (M.E.Foster@ed.ac.uk) 12/11/2000
+% Modified : Ken Forbus                              01/23/2004
+% Modified : Eli M. Silk (esilk@pitt.edu)            05/24/2005
+% Modified : Niels Taatgen (taatgen@cmu.edu)         10/24/2006
+% Modified : David Noelle (dnoelle@ucmerced.edu)     11/19/2014
+% Modified : Roger Levy (rplevy@mit.edu)             12/31/2018
+% Modified : Stephanie Denison                       11/29/2025
+% Modified : Dae Houlihan (daeda@mit.edu)            12/01/2025
+
+
+%%% Change "letterpaper" in the following line to "a4paper" if you must.
+
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage{caption}
+\captionsetup{
+  font={small,sf},
+  labelfont={sf},
+  textfont={sf}
+}
+\usepackage{cogsci}
+\usepackage{geometry}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
+\geometry{a4paper, margin=1in}
+
+\setcounter{secnumdepth}{3} % ensure counters are stepped
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{} % suppress printing "1", "1.1", etc. in headings
+\makeatother
+
+% \cogscifinalcopy %%% Uncomment this line for the final submission
+
+%%% Typography %%%
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[american]{babel}
+\usepackage{csquotes}
+\usepackage{newtxtext,newtxmath}  %%% TeX Gyre Termes
+
+%%% Bibliography %%%
+\usepackage[
+  backend=biber,
+  style=apa,
+  natbib=true,
+  annotation=false,
+]{biblatex}
+\addbibresource{cogsci_bibliography_template.bib} %%% Specify the path to a BibLaTeX file
+\setlength{\bibhang}{.125in}
+
+\usepackage{float} %%% Roger Levy added this and changed figure/table placement to [H] for conformity to Word template, though floating tables and figures to top is still generally recommended!
+
+% Sometimes it can be useful to turn off hyphenation for purposes such as spell checking of the resulting PDF.
+% \usepackage[none]{hyphenat} %%% Uncomment to turn off hyphenation
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{claim}{Claim}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+% Hyperlinks (load at end of preamble)
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\crefname{claim}{Claim}{Claims}
+\Crefname{claim}{Claim}{Claims}
+\newcommand{\omri}[1]{{\textcolor{red}{\textbf{Omri}: #1}}}
+\newcommand{\tomer}[1]{{\textcolor{blue}{\textbf{Tomer}: #1}}}
+\title{On Simple Mathematical Models of Free Recall}
+
+%%% Format authors using helper functions from authblk package %%%
+\author[1]{\mbox{Tomer Waizer (tomer.waizer@campus.technion.ac.il)}}
+\author[2]{\mbox{Omri Ben-Eliezer (omribene@cs.technion.ac.il)}}
+\author[3]{\mbox{Stefano Recanatesi (stefano@technion.ac.il)}}
+\affil[1]{Faculty of Computer Science, Technion - Israel Institute of Technology}
+\affil[2]{Faculty of Computer Science, Technion - Israel Institute of Technology}
+\affil[3]{Faculty of Medicine, Technion - Israel Institute of Technology}
+
+%%% Or, format authors manually %%%
+% \author{
+%   {\large\bfseries Author N. One (a1@uni.edu)$^1$ \& Author Number Two$^2$} \\
+%   {\normalsize\normalfont
+%     $^1$Department of Hypothetical Sciences, University of Illustrations \\
+%     $^2$Department of Example Studies, University of Demonstrations
+%   }
+% }
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Understanding how humans recall past experiences requires models that are both psychologically realistic and analytically transparent—two goals that are rarely achieved simultaneously. Toward this goal, we introduce the \emph{Tree of Memory (TOM)}, a simple framework that models free recall as a probabilistic search over a structured episodic hierarchy coupled with semantic associations. Despite its simplicity, TOM reproduces a broad range of hallmark free-recall phenomena, including primacy and recency effects, temporal contiguity, and the list-length effect. Crucially, the model admits rigorous mathematical analysis: we derive provable scaling laws showing that recall capacity grows either logarithmically or as a sublinear power law, depending on attentional dynamics. Simulations confirm these predictions and illustrate how episodic and semantic retrieval act as complementary mechanisms. By unifying analytic tractability with psychological realism, TOM provides a principled account of recall organization and offers a flexible foundation for studying memory capacity, attention, and forgetting.
+
+\textbf{Keywords:}
+episodic memory; free recall; list-length effect; attention; hierarchical models; semantic memory; mathematical modeling
+\end{abstract}
+
+\section{Introduction}
+Modeling human episodic memory is a central challenge in cognitive science, precisely because memory exhibits both vast capacity and strikingly systematic patterns of retrieval across a wide range of tasks. Classical frameworks such as the Search of Associative Memory (SAM) model \parencite{raaijmakers1981search} and the Temporal Context Model (TCM) \parencite{howard2002distributed} have been highly influential, successfully accounting for many qualitative and quantitative regularities in free recall. These models, and their numerous extensions, typically embody rich stochastic dynamics and a large number of tunable parameters, yielding excellent fits to data but making rigorous mathematical analysis extremely difficult. Consequently, many of their key predictions are evaluated through extensive computer simulations rather than through formal analytic results.
+
+Motivated by the desire to uncover \emph{first principles} of memory recall that admit precise mathematical characterization, a parallel line of research has explored analytically tractable models of episodic memory. A notable example is the recent work by Katkov, Naim, Georgiou and Tsodyks, who propose simplified models that reduce recall to a deterministic search or walk on a structure defined by memory representations, leading to universal predictions for recall capacity that can be solved analytically \parencite{katkov2022mathematical}. In particular, this body of work derives parameter‑free or low‑parameter laws governing the \emph{average number of items recalled} as a function of list length — relationships that have been validated against large‑scale recall experiments \parencite{naim2020fundamental,katkov2022mathematical}. This gap between highly realistic but complex models that account for many empirical findings and simpler models that focus on explaining specific phenomena motivates our central question:
+\begin{center}
+\emph{
+How realistic can a simple model of free recall be?
+}
+\end{center}
+In this work, we introduce the \emph{Tree of Memory (TOM)}, a novel framework that is \emph{simple} while also attempting to be \emph{psychologically realistic}. Informally, we define a model as \textbf{simple} if it allows mathematically provable and interpretable bounds on recall performance, and as \textbf{realistic} to the extent that it captures well‑established empirical regularities in human memory.
+The TOM model is constructed as a hierarchical tree in which each level represents experiences at a different temporal scale. Lower levels correspond to short-timescale events, such as individual words or numbers. Higher levels represent progressively longer timescale experiences, such as groups of words (e.g., sentences), structured sequences (e.g., phone numbers), or extended episodes like conversations. These examples are intended to illustrate the general principle of temporal hierarchy rather than to specify fixed or discrete time scales.\tomer{Add citation that support hierarchy of memory, and time scaling of experiences.}
+For a particular regime of parameters, Tree of Memory (TOM) reproduces the power-law recall behavior identified in recent analytically tractable models and further predicts a distinct logarithmic recall regime under alternative parameter settings. These results are derived formally and validated through simulations. Other effects, including primacy and temporal contiguity, are illustrated through simulations, since they arise directly from the model’s structure and can be established by straightforward arguments. More broadly, TOM provides a step toward unifying analytic tractability with the ability to capture several well-established regularities of free recall.
+
+We evaluate the psychological plausibility of the model in the context of the single-list free recall paradigm. Specifically, we show that TOM reproduces primacy and recency effects, the classic serial position curve in which early and late list items are recalled with higher probability \parencite{murdock1962serial}, the list-length effect whereby recall grows sublinearly with list length \parencite{katkov2022mathematical}, and temporal contiguity (CRP-lag), the tendency for consecutively recalled items to originate from nearby serial positions \parencite{kahana1996associative}.
+
+% For a particular regime of parameters, the Hierarchical Memory Tree (TOM) reproduces the power-law recall behavior identified in recent analytically tractable models and further predicts a distinct logarithmic recall regime under alternative parameter settings. These results are derived formally and validated through simulations. Crucially, the TOM provides a step toward unifying analytic tractability with the ability to reproduce several well-established free-recall regularities, including serial position effects, primacy and recency effects, and temporal contiguity.
+
+% To substantiate this claim of psychological realism, we show that the TOM reproduces key findings from the \emph{single-list free recall} paradigm. In particular, the model captures \emph{primacy and recency effects}, the classic serial position curve in which early and late list items are recalled with higher probability \parencite{murdock1962serial}; the \emph{list‑length effect}, whereby the number of recalled items grows sub-linearly with list length \parencite{katkov2022mathematical}; and \emph{temporal contiguity} (CRP‑lag), the tendency for items that are recalled in sequence to come from nearby serial positions \parencite{kahana1996associative}.
+
+Taken together, these results suggest that TOM offers a compelling balance between analytic tractability and psychological realism, while remaining sufficiently expressive to capture a broad range of episodic memory phenomena.
+\begin{figure*}[th]
+    \centering
+    % Resizebox ensures the wide diagram fits perfectly on the page
+    \resizebox{\linewidth}{!}{%
+    \input{TOM-lean-figure}
+    }
+    
+    \caption{TOM with Random Semantic Connections}
+    \label{fig:memory_model}
+\end{figure*}
+\section{TOM Definition}
+\label{sec:model}
+The \emph{Tree of Memory (TOM)} is designed to capture how people organize and retrieve memories during free recall. The model represents memory as a hierarchy of \emph{episodes} occurring at different temporal scales. Each node in the tree corresponds to a memory episode at a particular timescale, ranging from coarse summaries of experience to fine-grained representations of individual events.
+The model has two interacting components. The first is a tree-structured episodic representation that encodes when items were experienced across multiple timescales. The second is a semantic structure that represents relationships between items based on meaning. Together, these components allow the model to jointly capture temporal and semantic organization in recall. Because our primary focus is on the episodic component, we adopt two simple semantic structures that are not intended to provide a fully realistic account of semantic memory, but rather to illustrate how semantic associations can interact with episodic retrieval.
+
+In the episodic component, higher levels of the tree correspond to broader temporal episodes that summarize longer stretches of experience, while lower levels represent shorter, more fine-grained episodes, as shown in \cref{fig:memory_model}. In our setting, the levels of the tree correspond to:
+\begin{enumerate}
+\item \textbf{List episodes}: individual study lists within the session,
+\item \textbf{Chunk episodes}: short sequences of successive items within each list,
+\item \textbf{Item episodes}: the individual words at the leaves of the tree.
+\end{enumerate}
+
+In general, the model is not restricted to a tree of fixed height; longer temporal spans can be represented by introducing additional hierarchical levels. For the list-learning experiments considered here, however, we focus on a local subtree consisting of the bottom three levels rooted at the list node. Although this list node may itself be embedded within a larger hierarchy corresponding to earlier experiences, we omit these higher levels from the analysis. This simplification is justified because, at the onset of recall, the list constitutes the most recent episode, and retrieval can therefore be assumed to begin from the corresponding list node.
+Empirically, people often group items into small clusters of 2--6 elements during free recall \parencite{Cowan2001, Farrell2012}, and our model reflects this by giving each chunk a fixed small capacity $C$.
+
+For the semantic component, we aim for simplicity over realism, and consider two possible representations. One is an Erdős--Rényi graph \parencite{erdos1960evolution}, in which each node is a word and edges link semantically related items. The other is a high-dimensional sphere on which words are embedded such that nearby points correspond to semantically similar items. This semantic structure is treated as fixed throughout the experiment, while the episodic tree grows dynamically as words are presented.
+
+\subsection{Constructing TOM}
+
+The episodic tree is constructed online during study. At the onset of a list, a new list node is attached to the most recent experience, represented by a higher-level node in the tree corresponding to a longer timescale episode of which the list presentation is a part. In the single-list free recall paradigm, we focus only on the subtree rooted at the list node, since recall is initiated immediately after list presentation and the list context is therefore readily accessible. In contrast, if additional tasks intervene before recall, the list node may no longer be directly accessible, and recall must instead be initiated from a higher episodic level.
+Each incoming word \( w_t \) is assigned to the most recently created chunk, which is a child of the list node, unless that chunk has reached its capacity. In that case, a new chunk is created as an additional child of the list node, and \( w_t \) becomes its first child.
+
+\paragraph{Attention-weighted edge probabilities.}
+To capture the observation that attention tends to wane over time, we associate each edge in the tree with a probability of successful traversal during recall. Let $e_n$ denote the $n$-th edge created at a particular level of the tree. The probability of successfully traversing that edge, as in \cref{fig:memory_model} is
+\[
+P(e_n) = f(n),
+\]
+where \( f \colon \mathbb{N} \rightarrow [0,1] \) is a monotonically non-increasing function. Earlier edges therefore receive higher traversal probabilities, naturally giving rise to a \emph{primacy advantage}: items encoded earlier in a list are more accessible at retrieval.
+
+\subsection{Recall Procedure}
+\label{subsec:recall-procedure}
+Recall is modeled as a probabilistic depth-first search (DFS) through the episodic tree, augmented by occasional semantic transitions between words. Conceptually, recall unfolds as a sequential exploration process, alternating between temporally organized episodic structure and semantic associations. 
+
+\paragraph{Recall dynamics.}
+Recall in the model proceeds via two interacting mechanisms: episodic recall and semantic recall. We describe each mechanism separately and specify how control passes between them.
+
+\paragraph{Episodic recall.}
+Episodic recall is modeled as a probabilistic depth-first search over the episodic tree.
+\begin{enumerate}
+    \item Recall is initiated at a designated episodic node, which in the single-list free recall paradigm corresponds to the list node. \omri{root?}
+
+    \item If the current \emph{episodic node} $v$ is a leaf node, the item stored at $v$ (a word) is recalled, and control is passed to the semantic recall system.
+
+    \item Otherwise, the model considers all outgoing episodic edges from the current node $v$ to its children. These edges are sampled sequentially without replacement, with each edge selected with probability proportional to its traversal probability.
+
+    \item For each selected episodic edge, the model attempts to traverse it. If traversal succeeds, the model moves to the corresponding child node and repeats this procedure recursively. If traversal fails, the edge is discarded and the model attempts another outgoing edge from the current node.
+
+    \item When no further outgoing episodic edges remain at the current node, episodic traversal from that node terminates and the model backtracks to its parent.
+\end{enumerate}
+
+\paragraph{Semantic recall.}
+Semantic recall is initiated whenever a word is recalled during episodic traversal. \omri{It is also based on a depth-first search, but the underlying structure is a semantic graph (and not a tree, as in the episodic setting).}
+\begin{enumerate}
+    \item Upon entering semantic recall, the model considers the outgoing semantic edges from the recalled word.
+
+    \item Semantic edges are traversed sequentially, and each successful traversal leads to the recall of a semantically associated word.
+
+    \item From each newly recalled semantic word, semantic traversal continues recursively using the same procedure.
+
+    \item Semantic recall terminates when no further unrecalled semantic neighbors can be accessed.
+
+    \item Once semantic recall is exhausted, control returns to episodic recall at the leaf node corresponding to the initially recalled word, and episodic traversal resumes by backtracking upward.
+\end{enumerate}
+
+
+% \begin{algorithm}[H]
+% \caption{EpisodicRecall}
+% \begin{algorithmic}[1]
+% \label{alg:episodic-recall-algorithm}
+% \item  \textbf{Input:} Initial node $v$\\
+%  \textbf{Output:} Sequence of recalled items
+% \vspace{0.5em}
+% \STATE $W\leftarrow \emptyset$
+% \STATE currentNode $\leftarrow v$
+% \IF{currentNode is leaf}
+%     \RETURN SemanticRecall(currentNode)
+% \ENDIF
+% \STATE $C\leftarrow \text{getEpisodicOutgoingEdges(currentNode)}$
+% \WHILE{$C\neq\emptyset$} 
+%     \STATE nextEdge, nextChild = drawRandomEdge(C)
+%     \STATE $C\leftarrow C\setminus\{nextEdge\}$
+%     \IF{traversal of nextEdge successful}
+%         \STATE $W\leftarrow W\cup \text{EpisodicRecall(nextChild)}$
+%     \ENDIF
+% \ENDWHILE
+% \end{algorithmic}
+% \end{algorithm}
+
+% \begin{algorithm}[H]
+% \caption{SemanticRecall}
+% \begin{algorithmic}[1]
+% \label{alg:semantic-recall-algorithm}
+% \item  \textbf{Input:} Initial node $v$\\
+%  \textbf{Output:} Sequence of recalled items
+% \vspace{0.5em}
+% \STATE $W\leftarrow \{\text{v stored value}\}$
+% \STATE $C\leftarrow \text{getSemanticOutgoingEdges(v)}$
+% \FOR{(nextEdge, nextChild) in $C$} 
+%     \IF{traversal of nextEdge successful}
+%         \STATE $W\leftarrow W\cup \text{SemanticRecall(nextChild)}$
+%     \ENDIF
+% \ENDFOR
+% \RETURN W
+% \end{algorithmic}
+% \end{algorithm}
+
+% The overall process, as described in \cref{alg:episodic-recall-algorithm,alg:semantic-recall-algorithm}, is as follows:\\
+% Recall begins at the currently active node in the episodic tree, which in our setting is the node representing the studied list. From this node, the model considers the outgoing edges to its children, which correspond to chunk nodes.
+
+% At each step, the model selects one outgoing edge to attempt next. The probability of selecting a particular edge \(e\) is proportional to its traversal probability. Formally,
+% \[
+% \Pr[\text{choose edge } e]
+% \;=\;
+% \frac{\Pr[\text{traverse } e]}{\sum_{e' \in \{\text{relevant edges}\}} \Pr[\text{traverse } e']}.
+% \]
+
+% After an edge is selected, the model attempts to traverse it. Traversal succeeds with probability \(\Pr[\text{traverse } e]\). If the attempt fails, the edge is discarded and the model selects another outgoing edge from the same node, repeating the selection and traversal process.
+
+% If traversal succeeds, the model moves to the child node and applies the same procedure recursively: it selects one of the child’s outgoing edges, attempts to traverse it, and continues descending the tree. This process continues until a leaf node is reached. Reaching a leaf corresponds to recalling the item stored at that node, which in our case is a word.
+
+% After recalling a word, the model checks whether semantic connections are available from that word. If such connections exist, the model temporarily leaves the episodic tree and continues traversal on the semantic graph, following the same selection and traversal rules. Semantic traversal continues until no further unrecalled semantic neighbors can be accessed.
+
+% Once semantic traversal is exhausted, the model returns to the corresponding leaf node in the episodic tree. It then resumes episodic traversal by moving back to the parent node and attempting to explore any remaining unvisited children. If no such children remain, the model continues backtracking upward until further traversal options are available.
+
+% \begin{enumerate}
+%     \item Retrieval begins at the top of the episodic tree (the episode node).
+%     \item At each branching point, the model selects the next outgoing edge to explore, with edges having higher traversal probabilities being more likely to be chosen. After exhausting all edges we continue the search from our parent node.
+%     \item If an attempt to traverse an edge fails (with probability \(1 - P(e)\)), the subtree below that edge becomes inaccessible, capturing the idea that people sometimes lose access to entire clusters of information during recall.
+%     \item When the model reaches a word node, that word is output as a recall.
+%     \item From a recalled word, the search may continue either:
+%     \begin{enumerate}
+%         \item upward to the chunk or list, e.g continue the DFS traversal.
+%         \item sideways through semantic associations. \omri{I thought we also allow moving sideways inside the same chunk due to temporal associations?}\tomer{modified step 2 a bit and step 5(a), maybe now its more clear.}
+%         \tomer{add figure for recall and example in text}
+%     \end{enumerate}
+% \end{enumerate}
+
+% When the model enters the semantic network (step 5b), it traverses to the first available unrecalled semantic neighbor and continues exploring the semantic component as long as traversal is possible. When semantic exploration can no longer proceed—either because no unrecalled neighbors remain or because traversal attempts fail—the model returns to the word node in the episodic tree that initiated the semantic search and resumes recall from that point, continuing from step~5. This produces natural bursts of semantically related recalls, reflecting how people often retrieve a group of related items before switching back to the temporal structure of the list \parencite{howard2002distributed,Polyn2009}.
+
+% \begin{figure}[t]
+%     \centering
+%     \resizebox{\columnwidth}{!}{\input{recall_mechanics.tikz}}
+%     \caption{Schematic overview of the recall procedure. Recall proceeds via probabilistic traversal of the episodic tree; upon recalling a word, the model may temporarily explore semantic associations before returning to the episodic structure.}
+%     \label{fig:recall-mechanics}
+% \end{figure}
+
+\section{Model Analysis}
+In this section, we present the main mathematical results of our model, stated as theorems. Our primary and most difficult results address the list-length effect by demonstrating that for appropriate choices of the model parameters.% the expected number of recalled words can exhibit, for example, logarithmic or power-law behavior.
+
+We begin with a mathematical definition of \emph{Free Recall Test}.
+
+\begin{definition}[Free Recall Test]
+A \textit{Free Recall Test} of \(k\) words is a procedure in which the model is presented with \(k\) consecutive words \(w_1,\dots,w_k\) in serial order. After the presentation phase, the model is asked to recall as many of the words as possible.
+\end{definition}
+
+% \begin{definition}[Connected Component]
+% Given an undirected graph $G = (V,E)$, a \emph{connected component} (CCP) is a maximal subset of vertices $C \subseteq V$ such that for any two vertices $u,v \in C$, there exists a path in $G$ connecting $u$ and $v$.
+% \end{definition}
+
+% \begin{definition}[Simple Semantic Component]
+% \label{def:simple-semantic-component}
+% A \emph{Simple Semantic Component} is an undirected graph \(G=(V,E)\) whose largest connected component has size \(\Theta(\log k)\) with high probability. All edges in the component are traversed deterministically, i.e., for every \(e \in E\),
+% \[
+% P[\text{traverse } e] = 1.
+% \]
+
+% \omri{I don't think it should be put as a definition, let's discuss this in more detail on Monday. What makes it semantic, a priori? You can call it a different name and then say that all components in our semantic part of the recall look like this.} \tomer{maybe call it "Sparse Deterministic Graph"?}
+% \end{definition}
+Our main analytical result shows that it is possible to achieve realistic recall performance using our model. We instantiate it in two reasonable settings, achieving recall that is either logarithmic in length $k$ of the experiments (Theorem~\ref{thm:main-log}) or a small polynomial power in $k$ (Theorem~\ref{thm:main-powerlaw}).
+
+% In the \color{red}APPENDIX\color{black}, we show that both semantic components proposed by our model satisfy Definition~\ref{def:simple-semantic-component} under appropriate parameter regimes. This result is used to establish our main theorem.
+
+% The following two theorems present our main analytical results, characterizing two distinct recall regimes that arise in the TOM under different attentional scaling assumptions. Proofs are deferred to the \color{red}Appendix\color{black}, where the results are established via a sequence of claims and a reduction to a simplified variant of the model.
+
+
+\begin{theorem}[Logarithmic recall regime]
+\label{thm:main-log}
+Consider a free-recall experiment with \(k\) studied words and an TOM model with depth \(d\) and chunk size \(C\). There exist constants \(a,b>0\) such that, defining
+\[
+I \;=\;
+\left[
+\left(\frac{a \log k}{k}\right)^{1/d},
+\;
+\left(\frac{b}{k}\right)^{1/d}
+\right],
+\]
+the following holds. For any attention-weighted edge probability function
+\(f \colon \mathbb{N} \to I\),
+the expected number of recalled words satisfies, with high probability,
+\[
+\mathbb{E}[\text{number of recalled words}] = \Theta(\log k).
+\]
+\end{theorem}
+This theorem identifies a regime in which recall grows only logarithmically with list length, corresponding to a strongly capacity-limited recall process under pronounced attentional decay. 
+
+\begin{theorem}[Power-law recall regime]
+\label{thm:main-powerlaw}
+Consider a free-recall experiment with \(k\) studied words and an TOM model with depth \(d\) and chunk size \(C\). For every $0<\alpha <1$, there exist constants \(a,b>0\) such that, defining
+\[
+I =
+\left[
+\left(\frac{a}{k^{1-\alpha}}\right)^{1/d},
+\;
+\left(\frac{b}{k^{1-\alpha} \log(k)}\right)^{1/d}
+\right],
+\]
+the following holds. For any attention-weighted edge probability function
+\(f \colon \mathbb{N} \to I\),
+the expected number of recalled words satisfies, with high probability,
+\[
+\mathbb{E}[\text{number of recalled words}] = \Theta(k^\alpha).
+\]
+\end{theorem}
+
+
+This theorem characterizes a family of regimes in which recall grows as a sublinear power of list length, interpolating between severely capacity-limited and more expansive recall behavior. 
+
+We illustrate the application of our theorems with a concrete example. Consider a free-recall experiment with \(k = 256\) studied words. Let \(a = \frac{1}{2}\) and \(b = 8\). In a single-list recall setting, the model depth is \(d = 2\). For \(k = 256\), we have \(\log(k) =8\), \( \sqrt{k} = 4\). Substituting these values into Theorems~\ref{thm:main-log} and~\ref{thm:main-powerlaw} (with \(\alpha = \tfrac{1}{2}\) in Theorem~\ref{thm:main-powerlaw}) yields the following two admissible intervals for the attention function, namely
+\[I_{\log}=[0.125,0.177],\, I_{sqrt}=[0.177,0.25]\]
+% \[
+% I = [0.3535,\; 0.433].
+% \]
+% We illustrate the application of our theorems with a concrete example. Consider a free-recall experiment with \(k = 16\) studied words. Let \(a = \frac{1}{2}\) and \(b = 3\). In a single-list recall setting, the model depth is \(d = 2\). For \(k = 16\), we have \(\log(k) = \sqrt{k} = 4\). Substituting these values into Theorems~\ref{thm:main-log} and~\ref{thm:main-powerlaw} (with \(\alpha = \tfrac{1}{2}\) in Theorem~\ref{thm:main-powerlaw}) yields the same admissible interval for the attention function, namely
+% \[
+% I = [0.3535,\; 0.433].
+% \]
+
+
+Taken together, Theorems~\ref{thm:main-log} and~\ref{thm:main-powerlaw} show that TOM admits multiple recall scaling regimes, ranging from logarithmic to sublinear power-law growth. The specific regime realized depends on the magnitude of attention-weighted traversal probabilities. This unifies disparate recall behaviors within a single cognitive architecture and provides a mechanistic account of how variations in attentional decay can give rise to qualitatively different recall capacities.
+
+Toward the proof, we assume that the semantic component can be modeled as a simple graph in which every existing edge is traversed with probability~1. By well-known results in random graph theory \parencite{Bollobás_2001}, with high probability, the largest connected component of this graph has size \(\Theta(\log k)\). Both semantic models proposed in this work can be reduced to this setting, although we do not present the reduction here.
+
+\subsection{Theoretical proof sketch}
+
+In this section, we present the proof of Theorem~\ref{thm:main-log}; the proof of Theorem~\ref{thm:main-powerlaw} follows by a very similar argument.\footnote{In fact, both theorems can be thought of as special cases of a more general result which connects recall performance to the parameters of the model (traversal probabilities); here, for simplicity and readability, we chose to focus on a specific regime of interest.} 
+%
+The proof proceeds by first analyzing a simplified version of the TOM model in which the attention function is constant, \(f(n) = c\) for some \(0 < c < 1\). We derive bounds for this simplified model and then extend the analysis to the full TOM model.
+
+
+\begin{claim}
+    \label{clm:simple-tom-recall-prob}
+    Given a TOM model with depth \(d\), chunk size \(C\) and constant tree-edge traversal probability \(p\) (with \(0<p<1\)). For a leaf \(w\) in the episodic tree, 
+    \[P[\text{$w$ is recalled}]=p^d.\]
+\end{claim}
+
+Due to space constraints, we only provide a quick intuition toward the proof of Claim~\ref{clm:simple-tom-recall-prob}. The idea is that a word $w$ at depth $d$ is recalled if and only if all edges on the path leading to $w$ are traversed. This path is of length $d$, and each edge is traversed with probability $p$, implying the claim.
+
+
+
+%The claim can be proved by induction on the depth \(d\) of the TOM model. For the base case \(d=1\), recall is initiated at a node \(v_0\). Since the depth is \(1\), the target node \(w\) is a direct child of \(v_0\), and therefore the edge \((v_0,w)\) exists. The probability of traversing this edge is \(p\), as required.
+
+%Assume now that the claim holds for depth \(d\). To prove it for depth \(d+1\), consider the unique path from \(v_0\) to \(w\),
+%\(v_0 \to v_1 \to \cdots \to v_d \to w\).
+%By the same reasoning as in the base case, the probability of traversing the first edge \((v_0,v_1)\) is \(p\). By the induction hypothesis, the probability of reaching \(w\) from \(v_1\) is \(p^d\). Therefore, the probability of reaching \(w\) from \(v_0\) is \(p \cdot p^d = p^{d+1}\), completing the proof.
+
+The following lemma addresses the main technical challenge underlying our analysis. %We present its proof in full.
+
+\begin{lemma}\label{lem:simple-tom-log}
+Given a free recall test of \(k\) words and a simple-TOM model with depth \(d\), chunk size \(C\), a semantic component modeled by a simple graph (having 1 traversal probability) with maximum CCP of size \(\Theta(\log(k))\) w.h.p, and tree-edge traversal probability \(p\) (with \(0<p<1\)). Then w.h.p there exists an interval \(I \subset [0,1]\) such that for all \(p \in I\):
+\[
+E[\text{number of recalled words}] = \Theta(\log k).
+\]
+\end{lemma}
+\begin{proof}
+Let \( A \subseteq \{w_1,\dots,w_k\} \) denote the set of recalled words using the episodic structure. %From \cref{clm:simple-tom-recall-prob}, for each word \(w_i\) we have
+%\[
+%\Pr[w_i \in A] = p^d
+%\]
+
+Fix the semantic graph and let \( C_1,\dots,C_m \) denote its connected components, where \( m \) is the number of connected components. Define the random variables
+\[
+X_i =
+\begin{cases}
+|C_i|, & \text{if } C_i \cap A \neq \emptyset, \\
+0, & \text{otherwise}.
+\end{cases}
+\]
+
+Then
+\[
+\begin{aligned}
+\Pr[X_i = |C_i|]
+  &= \Pr[C_i \cap A \neq \emptyset]= \Pr\!\left[ \bigcup_{c \in C_i} \{c \in A\} \right] \\
+  &\leq \sum_{c \in C_i} \Pr[c \in A]
+\end{aligned}
+\]
+Moreover, from Claim \ref{clm:simple-tom-recall-prob},
+\[
+\Pr[X_i = |C_i|] \geq \max_{c \in C_i} \Pr[c \in A]
+= p^d
+\]
+
+We now bound the expected number of recalled words, denote by \(R\) the number of recalled words. By linearity of expectation,
+\[
+\mathbb{E}[R]
+= \mathbb{E}\!\left[\sum_{i=1}^m X_i\right]
+= \sum_{i=1}^m \mathbb{E}[X_i].
+\]
+Using the upper bound on \(\Pr[X_i = |C_i|]\), we obtain
+\[
+\begin{aligned}
+   \mathbb{E}[R]
+= \sum_{i=1}^m |C_i| \cdot \Pr[X_i = |C_i|]
+\leq \sum_{i=1}^m |C_i|^2  p^d 
+\end{aligned}
+\]
+Consequently,
+\[
+\begin{aligned}
+    \mathbb{E}[R]
+&\leq (\max_i |C_i|) \cdot\sum_{i=1}^m |C_i|  p^d\\
+&= \Theta\!\left(k \log(k)\,  p^d\right)
+\end{aligned}
+\]
+
+Similarly, using the lower bound on \(\Pr[X_i = |C_i|]\),
+\[
+\begin{aligned}
+    \mathbb{E}[R]
+&= \sum_{i=1}^m |C_i| \cdot \Pr[X_i = |C_i|]\\
+&\geq \sum_{i=1}^m |C_i| \cdot  p^d
+= k \cdot p^d
+\end{aligned}
+\]
+
+Choose constants \(a,b > 0\) such that \( b > a \log(k) \), and define the interval
+
+\[I =
+\left[
+\left(\frac{a \log(k)}{k }\right)^{1/d},
+\;
+\left(\frac{b}{k}\right)^{1/d}
+\right].
+\]
+%\end{equation}
+To ensure \( I \subseteq [0,1] \), we additionally require
+$
+b \leq k$
+%\quad
+%\text{ and }
+%\quad
+and 
+$
+a < \frac{k}{\log(k)}.
+$
+Then, for every \( p \in I \), we have 
+$
+a \log(k)
+\leq \mathbb{E}[R]
+\leq b \log(k),
+$
+as required.
+\end{proof}
+
+We now turn to the proof of Theorem~\ref{thm:main-log}.
+
+\begin{proof}
+    From \cref{lem:simple-tom-log} we have \(I=[a,b]\subset[0,1]\) such that for every \(p\in I\) our expected recall would be \(\Theta(\log(k))\), let \(f\colon \mathbb{N}\rightarrow I\) some function which sets of edge probabilities, then its easy to see that TOM model with edge probabilities chosen using \(f\) will perform worse than simple-TOM model with uniform edge probabilities of \(b\), because the TOM probabilities would be bounded from above by \(b\). Thus we will have the expected number of words in the TOM model bounded by the simple-TOM with \(b\) edge probabilities which is \(\Theta(\log(k))\). The same argument could be used for lower bounding our TOM model with simple-TOM with \(a\) edge probabilities, and we get
+    \[E[\text{number of recalled words}]=\Theta(\log(k))\]
+    as desired.
+\end{proof}
+\section{Simulations}
+
+We conducted comprehensive simulations of the Tree of Memory (TOM) model to evaluate its ability to capture key phenomena in free recall. The simulations focused on three aspects: single-list free recall behavior, the list-length effect under different attentional scaling regimes, and the interaction between episodic chunking and semantic retrieval.
+
+\subsection{Model Parameters}
+
+Unless otherwise noted, simulations use the following default parameter values. The episodic hierarchy employ a chunk capacity of \(C = 4\) items per chunk. The attention function decay monotonically with position within each level according to
+\[
+f(n) = 0.3 + 0.5^{n},
+\]
+where \(n\) denotes the zero-based position index.
+
+In a similar spirit to \parencite{katkov2022mathematical}, the semantic component is modeled as an Erdős--Rényi (ER) random graph representing semantic associations. Semantic retrieval dynamics are governed by the following parameters: semantic search is always initiated following episodic recall (\(p_{\text{sem}}^{\text{enter}} = 1.0\)), semantic walks continue deterministically once initiated (\(p_{\text{sem}}^{\text{continue}} = 1.0\)), and each semantic edge is traversed with probability \(p_{\text{sem}}^{\text{edge}} = 0.1\).
+
+All parameters are held fixed across experiments unless explicitly stated otherwise.
+
+\subsection{Experiment 1: Single-List Free Recall}
+
+To assess single-list free recall behavior, we simulated \(N = 1000\) trials with lists of length \(L = 20\). For each trial, a new episodic tree was constructed according to the hierarchical organization described in Section~\ref{sec:model}, and a new semantic graph was generated using the ER model with edge probability \(q = 0.06\). Recall proceeded via the probabilistic depth-first search algorithm with semantic bursts, as described in Section~\ref{subsec:recall-procedure}.
+
+From these simulations, we computed two standard measures of free recall performance:
+\begin{itemize}
+    \item \textbf{Serial Position Curve (SPC)}: the probability of recalling an item as a function of its serial position.
+    \item \textbf{Lag-Conditional Response Probability (lag-CRP)}: the probability of transitioning between recalled items as a function of their temporal lag.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{single-list-simulation.png}
+    \caption{Single-list free recall simulation results. (A) shows the probability of recalling an item as a function of its serial position. (B) shows the probability of transitioning between recalled items as a function of their temporal lag.}
+    \label{fig:single-list-experiment}
+\end{figure}
+\subsection{Experiment 2: List-Length Effect}
+
+To examine the list-length effect, we simulated recall across a range of list lengths
+\begin{align*}
+L \in \{&10, 15, 20, 25, 30, 40, 50, 60, 80, \\
+&100, 120, 140, 160, 180, 200\}.
+\end{align*}
+For each list length, we ran \(N = 5000\) independent trials.
+
+We investigated two attentional scaling regimes that yield sublinear recall growth. In the first regime, corresponding to the logarithmic recall behavior predicted by Theorem~\ref{thm:main-log}, the attention function was set according to
+\begin{equation}
+    f(n) = \sqrt{\frac{3 \log L}{L}}.
+\end{equation}
+This scaling follows from the theoretical bounds (taking lower bound with \(a=3\)) on traversal probabilities and ensures logarithmic growth in expected recall.
+In the second regime, corresponding to the power-law behavior characterized in Theorem~\ref{thm:main-powerlaw}, we employed a weaker square-root scaling,
+\begin{equation}
+    f(n) = \sqrt{\frac{2}{ L^{1/2}}}.
+\end{equation}
+This choice permits faster recall growth while remaining strictly sublinear.
+%
+For both regimes, the semantic graph edge probability was scaled inversely with list length, \(q(L) = 0.5/L\), ensuring that the semantic component satisfied required conditions.
+
+Expected recall performance was compared against theoretical predictions. Specifically, we considered
+\[
+E[\text{recalls}] = \sqrt{\frac{3\pi L}{2}}
+\]
+for the power-law regime \parencite{naim2020fundamental}, and
+\[
+E[\text{recalls}] = 3\log L
+\]
+for the logarithmic regime.
+
+\begin{figure}[h]
+    \centering    \includegraphics[width=\linewidth]{list-length-simulation.png}
+    \caption{List-length effect simulations for (A) logarithmic and (B) power-law  attention scaling.}
+    \label{fig:list-length-simulations}
+\end{figure}
+
+% \subsection{Experiment 3: Chunk Capacity and Semantic Edge Probability}
+
+% To explore how episodic chunking and semantic retrieval jointly influence recall, we conducted a parameter sweep over chunk capacity \(C \in \{2,3,4,5,6,8,10\}\) and semantic edge traversal probability \(p_{\text{sem}}^{\text{edge}} \in \{0.0, 0.1, 0.2, \ldots, 1.0\}\).
+
+% For each parameter combination, we simulated \(N = 500\) trials with list length \(L = 20\). All other parameters were fixed at their default values. We measured the mean number of recalled items across trials.
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.75\linewidth]{chunk-size-sem-simulation.png}
+%     \caption{Mean recall performance as a function of chunk capacity and semantic edge traversal probability.}
+%     \label{fig:chunk-sem-simulation}
+% \end{figure}
+
+\subsection{Results}
+
+We now summarize the results of these simulations, focusing on how the TOM reproduces key empirical effects in free recall and how recall performance varies across parameter regimes.
+
+\subsubsection{Single-List Free Recall}
+
+Figure~\ref{fig:single-list-experiment}(A) shows the serial position curve produced by the model. A pronounced primacy effect is observed for the first few list items, followed by uniformly low recall probabilities for middle positions. This pattern closely matches classic empirical findings \parencite{murdock1962serial,kahana1996associative}.
+
+Figure~\ref{fig:single-list-experiment}(B) presents the lag-CRP, revealing elevated transition probabilities for small temporal lags and a clear forward asymmetry. This reflects the hierarchical episodic organization of the model and the monotonic decay of the attention function, which jointly favor forward transitions between temporally adjacent items.
+
+\subsubsection{List-Length Effect}
+
+Figure~\ref{fig:list-length-simulations} shows recall performance as a function of list length for both attention-scaling regimes. In both cases, recall grows sublinearly with list length and closely follows the theoretical predictions.
+
+The logarithmic regime produces slower growth, reflecting stronger attentional decay, whereas the power-law regime permits faster yet still sublinear recall growth. Together, these results capture the well-established empirical list-length effect.
+
+% \subsubsection{Chunk Capacity and Semantic Edge Probability}
+
+% Figure~\ref{fig:chunk-sem-simulation} presents recall performance across the parameter sweep. Recall increases monotonically with both chunk capacity and semantic edge traversal probability, reaching maximum performance when both parameters are largest.
+
+% These results indicate that episodic chunking and semantic retrieval contribute independently and additively to recall performance. The absence of interference effects suggests that the episodic hierarchy and semantic associations operate as complementary retrieval mechanisms within the TOM framework.
+
+\section{Discussion}
+
+In this work, we introduced the Tree of Memory (TOM), a framework that bridges the gap between analytically tractable models of memory and psychologically realistic accounts of free recall. By formalizing recall as a probabilistic depth-first search over a hierarchical episodic structure coupled with a semantic component, the model captures several hallmark phenomena of free recall while remaining amenable to rigorous mathematical analysis.
+
+A central contribution of this work is the characterization of the list-length effect. Our theoretical results show that recall capacity can scale either logarithmically or as a sublinear power law, depending on the decay of attention-weighted traversal probabilities. This provides a mechanistic account of capacity limitations in recall that emerges from attentional constraints rather than from a fixed-capacity buffer, unifying multiple empirical scaling regimes within a single framework.
+
+Simulation results further indicate that episodic and semantic retrieval processes act as complementary mechanisms. The episodic hierarchy promotes temporal organization and contiguity, while semantic associations provide alternative retrieval routes when episodic access fails. Together, these components support robust recall without evidence of interference, consistent with dual-route theories of memory retrieval.
+
+Despite these strengths, the current formulation of the TOM focuses primarily on single-list recall and therefore does not fully capture graded long-term forgetting across multiple study lists. In multi-list paradigms, recall is often degraded even when a list remains partially accessible, a pattern not explained by the base model. This limitation highlights the need for an additional mechanism that modulates recall strength as a function of episodic remoteness. We address this issue by proposing a principled extension that attenuates retrieval probabilities with search depth, thereby inducing graded forgetting across lists. A full analysis of this extension is left for future work.
+
+Overall, the TOM provides a parsimonious yet expressive framework for studying episodic memory. By combining analytic transparency with psychologically grounded structure, it offers a flexible foundation for investigating how attention, temporal organization, and semantic associations jointly shape human recall.
+
+
+% \section{Model Extensions}
+% \subsection{Long-Term Forgetting}
+% Although the proposed semantic–episodic model captures several core properties of human recall, it does not yet incorporate a mechanism for graded long-term forgetting. To illustrate this limitation, consider a free-recall paradigm consisting of multiple study lists. During recall, each list is initially retrieved in its own local recall phase, initiated from the corresponding list node in the hierarchical memory tree (TOM). After the final list, a global recall phase begins in which the subject is asked to recall items from any previously studied list.
+
+% In this global phase, recall is initiated from the episodic level of the TOM (one level above the list nodes), and traversal proceeds as described in Section~2.2. At this level, each outgoing edge to a list node is traversed with probability \(P(e)\), and failure to traverse such an edge corresponds to forgetting the entire list. While this mechanism captures list-level forgetting, it yields an unrealistic consequence: conditional on successfully accessing a list, the expected number of recalled items from that list is identical to that observed during its single-list recall phase.
+
+% Empirically, however, subjects tend to recall fewer items from a list during global recall than during its local recall phase, even when the list is not entirely forgotten. This suggests the need for a mechanism that induces graded forgetting within lists.
+
+% To address this limitation, we introduce a depth-dependent attenuation of traversal probabilities. During the depth-first search (DFS) recall procedure, we record the current search depth \(d\). When attempting to traverse an edge at depth \(d\), we attenuate its traversal probability according to
+% \begin{equation}
+%     \label{eqt:depth-attenuation}
+%     \Pr(\text{traverse edge } e \mid \text{DFS depth } d) \;=\; \lambda^d \cdot P(e)
+% \end{equation}
+% where \(0 < \lambda \leq 1\) is a new model parameter controlling long-term forgetting. The original recall procedure is recovered when \(\lambda = 1\), whereas \(\lambda < 1\) induces exponential attenuation of edge traversals with depth. This extension reduces the expected number of recalled items during global recall and produces a more realistic forgetting profile across lists.
+
+% \section{Discussion}
+
+% In this work, we introduced the Hierarchical Memory Tree (TOM), a framework designed to bridge the gap between analytically tractable models of memory and psychologically realistic simulations of free recall. By formalizing recall as a probabilistic depth-first search over a hierarchical episodic structure coupled with a semantic network, we showed that a wide range of empirical phenomena—including serial position effects, temporal contiguity, semantic clustering, and sublinear recall scaling—can emerge from a small set of simple and interpretable mechanisms.
+
+% \subsection{Bridging Analytical Tractability and Psychological Realism}
+
+% A central motivation for this study was the long-standing tension between analytically transparent models, which often abstract away cognitive structure, and richly parameterized models such as TCM or SAM, which capture empirical regularities at the cost of mathematical opacity. Our results suggest that the TOM occupies a viable middle ground. The model retains sufficient structure to permit rigorous analysis of recall capacity while incorporating stochasticity and representational richness through its episodic and semantic components.
+
+% The ability of the TOM to reproduce the primacy effect and the characteristic asymmetry of the lag-CRP demonstrates that a hierarchical episodic representation naturally encodes temporal structure. Importantly, these effects arise without the need for a drifting context vector, as in TCM, suggesting that temporal contiguity can instead be implemented through structural constraints on retrieval.
+
+% \subsection{Attention Scaling and the List-Length Effect}
+
+% One of the primary theoretical contributions of this work is the characterization of the list-length effect. Through Theorems~\ref{thm:main-log} and~\ref{thm:main-powerlaw}, we showed that the scaling of recall capacity—whether logarithmic or sublinear power-law—is governed by the decay rate of the attention function. This provides a mechanistic account of how recall limitations can arise from constraints on attentional allocation rather than from a fixed-capacity buffer.
+
+% By deriving explicit bounds on traversal probabilities, we demonstrated that the TOM can accommodate multiple recall regimes while preserving the empirically observed constraint that recall grows sublinearly with list length. This flexibility allows the model to reconcile seemingly disparate findings within a unified framework.
+
+% \subsection{Episodic and Semantic Retrieval as Complementary Processes}
+
+% Simulation results revealed a constructive interaction between episodic chunking and semantic associations. Increasing either chunk capacity or semantic connectivity improved recall performance monotonically, with no evidence of interference between the two mechanisms. This finding supports dual-route theories of retrieval, in which episodic and semantic processes provide complementary pathways to memory access.
+
+% Within the TOM, episodic structure constrains the search process and promotes temporal organization, while the semantic network provides alternative retrieval routes when episodic access fails. Together, these components yield robust recall behavior that is greater than the sum of its parts.
+
+% \subsection{Limitations and Future Directions}
+
+% Despite its strengths, the TOM relies on several simplifying assumptions. The semantic component is modeled using idealized graph structures, whereas real semantic networks exhibit small-world and scale-free properties. Incorporating more realistic semantic representations may further refine the model’s predictions.
+
+% In addition, while the core results focus on single-list recall, graded long-term forgetting across lists is not fully captured in the base model. We addressed this limitation by proposing a depth-dependent attenuation mechanism as a principled extension (Section~X), though a full empirical evaluation of this extension remains an important direction for future work.
+
+% More broadly, the analytical transparency of the TOM opens the door to applications beyond aggregate behavior. Fitting model parameters to individual subject data may help dissociate episodic and semantic deficits in clinical populations, and integrating empirically derived semantic representations could enable item-specific recall predictions.
+
+% \subsection{Conclusion}
+
+% The Hierarchical Memory Tree provides a parsimonious yet expressive framework for modeling episodic memory. By combining mathematical tractability with psychological realism, it offers a unified account of recall dynamics and a flexible foundation for future theoretical and empirical investigations.
+
+
+\section{Acknowledgments}
+
+
+We made light use of AI-based tools during the development of this work. Cursor AI was used to assist with writing and debugging Python code for simulations of the TOM model. ChatGPT was used to assist with figure design, including model sketches, layout, coloring, and styling of visualizations. We stress that all scientific decisions, model design, analyses, and interpretations were performed by the authors.
+
+
+\nocite{August2007}
+\nocite{DaphneEcho2022}
+\nocite{FitzgeraldGalli1985}
+\nocite{Hakuole2001}
+\nocite{Issa1963}
+\nocite{Lobsang2023}
+\nocite{MitanniNovember1972}
+
+\printbibliography
+
+\end{document}

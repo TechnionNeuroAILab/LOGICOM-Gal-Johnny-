@@ -1,0 +1,350 @@
+%%%
+%%% Annual Cognitive Science Conference
+%%% Sample LaTeX Paper -- Proceedings Format
+%%%
+
+% Original : Ashwin Ram (ashwin@cc.gatech.edu)       04/01/1994
+% Modified : Johanna Moore (jmoore@cs.pitt.edu)      03/17/1995
+% Modified : David Noelle (noelle@ucsd.edu)          03/15/1996
+% Modified : Pat Langley (langley@cs.stanford.edu)   01/26/1997
+% Latex2e corrections by Ramin Charles Nakisa        01/28/1997
+% Modified : Tina Eliassi-Rad (eliassi@cs.wisc.edu)  01/31/1998
+% Modified : Trisha Yannuzzi (trisha@ircs.upenn.edu) 12/28/1999
+% Modified : Mary Ellen Foster (M.E.Foster@ed.ac.uk) 12/11/2000
+% Modified : Ken Forbus                              01/23/2004
+% Modified : Eli M. Silk (esilk@pitt.edu)            05/24/2005
+% Modified : Niels Taatgen (taatgen@cmu.edu)         10/24/2006
+% Modified : David Noelle (dnoelle@ucmerced.edu)     11/19/2014
+% Modified : Roger Levy (rplevy@mit.edu)             12/31/2018
+% Modified : Stephanie Denison                       11/29/2025
+% Modified : Dae Houlihan (daeda@mit.edu)            12/01/2025
+
+
+%%% Change "letterpaper" in the following line to "a4paper" if you must.
+
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage{caption}
+\captionsetup{
+  font={small,sf},
+  labelfont={sf},
+  textfont={sf}
+}
+\usepackage{cogsci}
+\usepackage{geometry}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
+\geometry{a4paper, margin=1in}
+
+\setcounter{secnumdepth}{3} % ensure counters are stepped
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{} % suppress printing "1", "1.1", etc. in headings
+\makeatother
+
+% \cogscifinalcopy %%% Uncomment this line for the final submission
+
+%%% Typography %%%
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[american]{babel}
+\usepackage{csquotes}
+\usepackage{newtxtext,newtxmath}  %%% TeX Gyre Termes
+
+%%% Bibliography %%%
+\usepackage[
+  backend=biber,
+  style=apa,
+  natbib=true,
+  annotation=false,
+]{biblatex}
+\addbibresource{cogsci_bibliography_template.bib} %%% Specify the path to a BibLaTeX file
+\setlength{\bibhang}{.125in}
+
+\usepackage{float} %%% Roger Levy added this and changed figure/table placement to [H] for conformity to Word template, though floating tables and figures to top is still generally recommended!
+
+% Sometimes it can be useful to turn off hyphenation for purposes such as spell checking of the resulting PDF.
+% \usepackage[none]{hyphenat} %%% Uncomment to turn off hyphenation
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{claim}{Claim}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+% Hyperlinks (load at end of preamble)
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\crefname{claim}{Claim}{Claims}
+\Crefname{claim}{Claim}{Claims}
+\newcommand{\omri}[1]{{\textcolor{red}{\textbf{Omri}: #1}}}
+\newcommand{\tomer}[1]{{\textcolor{blue}{\textbf{Tomer}: #1}}}
+\title{Agreeable but Rational: Benchmarking LLM
+Persuasion and Reasoning in Debating
+Competitions}
+% \title{On Simple Mathematical Models of Free Recall}
+
+%%% Format authors using helper functions from authblk package %%%
+\author[1]{\mbox{Tomer Waizer (tomer.waizer@campus.technion.ac.il)}}
+\author[2]{\mbox{Omri Ben-Eliezer (omribene@cs.technion.ac.il)}}
+\author[3]{\mbox{Stefano Recanatesi (stefano@technion.ac.il)}}
+\affil[1]{Faculty of Computer Science, Technion - Israel Institute of Technology}
+\affil[2]{Faculty of Computer Science, Technion - Israel Institute of Technology}
+\affil[3]{Faculty of Medicine, Technion - Israel Institute of Technology}
+
+%%% Or, format authors manually %%%
+% \author{
+%   {\large\bfseries Author N. One (a1@uni.edu)$^1$ \& Author Number Two$^2$} \\
+%   {\normalsize\normalfont
+%     $^1$Department of Hypothetical Sciences, University of Illustrations \\
+%     $^2$Department of Example Studies, University of Demonstrations
+%   }
+% }
+
+\begin{document}
+
+\maketitle
+% \thispagestyle{empty}
+% \pagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Abstract}
+\begin{abstract}
+We assess the agreeability and reasoning capabilities of large language models (LLMs) through a structured debating setup. Two LLMs engage in moderated debates across diverse topics, where one acts as persuader and the other as responder. We find that LLMs switch positions in over 80\% of cases, indicating high agreeability.
+To probe reasoning quality, we constrain the persuader to use either logical or fallacious arguments. Logical strategies significantly increase persuasion success, while fallacious ones reduce it. This contrasts with human behavior and indicates that LLMs respond more reliably to structured reasoning than to rhetorical tactics.
+These results reveal the increasing logical abilities of LLMs and provide clear avenues for benchmarking their behavior in comparison to humans.
+\textcolor{green}{Johnny: This is not logical}
+\end{abstract}
+
+\section*{INTRODUCTION}
+Large language models (LLMs) have become indispensable tools for information retrieval, summarization, and open-ended dialogue. Their expanding use in high-stakes domains such as education, law, and decision-making has intensified scrutiny of their reasoning capabilities and behavioral reliability. Early concerns centered on their tendency to agree with users too readily and their vulnerability to fallacious or rhetorically manipulative inputs. Prior studies documented high stance-switching rates and frequent failures in logical rigor, raising questions about the soundness of LLM-generated conclusions in adversarial contexts\citep{laban2023flipflop, malmqvist2024sycophancy}.
+
+Recent work has both reinforced and challenged these concerns. Benchmarks like FlipFlop and LOGICOM have shown that while models such as GPT-3.5 and GPT-4 demonstrate improved logical performance, they remain susceptible to fallacious reasoning in dialogue\citep{laban2023flipflop, payandeh2023logicom}. However, these findings often rely on implicit or uncontrolled deployments of argumentation. Our study builds on this line of work with a more structured and adversarial framework, in which two LLMs debate each other under explicit reasoning constraints. This approach enables a finer-grained analysis of model behavior under pressure and a direct evaluation of whether fallacies or logic are more effective in persuasion.
+
+We report several key findings. First, LLMs remain highly agreeable: in over 80\% of cases, the responder model changes its stance by the end of the debate\citep{salecha2024large}. Second, persuasion ability varies markedly between models, with one system (Model X) consistently outperforming others. Third, when we constrain the persuader to use either logical or fallacious strategies, we observe a reversal of earlier patterns: logical arguments are significantly more persuasive, while fallacies reduce the chance of changing the responder's mind\citep{wang2024logic}. These outcomes diverge from previous results and indicate a shift in LLM behavior toward increased logical robustness.
+
+Taken together, our results challenge prevailing narratives about LLM brittleness and suggest that newer models are not only more logically competent but also less prone to manipulation than previously thought\citep{yax2024reasoning}. Structured debates offer a powerful framework for benchmarking such advancements and probing the evolving dynamics of model behavior in adversarial settings.
+
+% Large language models (LLMs) have rapidly become central tools in information retrieval, summarization, and dialogue systems. As their deployment expands to high-stakes contexts such as education, legal reasoning, and decision support, questions about their reasoning abilities and susceptibility to manipulation become increasingly critical. While LLMs can produce fluent and coherent responses, it remains unclear how these models behave under adversarial or argumentative pressure.
+
+% A core concern is whether LLMs are overly agreeable—prone to shifting opinions or accommodating opposing views too readily. This behavior could pose challenges in alignment, robustness, and reliability. In parallel, the role of reasoning quality—whether grounded in logic or fallacy—in shaping LLM behavior remains largely underexplored. Prior studies have suggested that LLMs are vulnerable to fallacious patterns or rhetorical noise, raising further doubts regarding their reliability.
+
+% In this paper, we adopt a structured debating framework to systematically probe these issues. We pit LLMs against each other in moderated debates across a wide range of topics, with one model assigned the role of persuader and the other as responder. This setup allows us to measure agreeability (i.e., stance switching), persuasion effectiveness, and responsiveness to different types of reasoning.
+
+% Our findings show that, first, LLMs exhibit extremely high agreeability: in over 80\% of debates, the responder changes its original stance. Second, persuasion ability varies markedly across models, with one model (Model X) consistently outperforming others. Third, when persuasion is constrained to either logical or fallacious strategies, we find that logical arguments significantly increase success, while fallacies decrease it. This runs counter to earlier reports about LLMs being prone to fallacious reasoning and highlights their increasing capacity for logical processing.
+
+% These results challenge common narratives about LLM reasoning fragility and offer new tools for benchmarking model behavior in structured, comparative settings.
+
+
+\section*{Background}
+\paragraph{Agreeability and Stance Switching in LLMs.}
+Large language models (LLMs) often exhibit a high degree of agreeability, readily altering their stance in response to user prompts or minimal pressure. Studies using the \textit{FlipFlop} benchmark show that models like GPT-4 and Claude 2 revise their answers in over 40\% of cases when asked follow-up questions such as ``Are you sure?''\citep{laban2023flipflop}. These reversals are frequently accompanied by a decline in answer accuracy.
+
+This pattern has been linked to social desirability bias. Research suggests LLMs adjust responses to align with traits deemed socially favorable, such as agreeableness and extroversion\citep{salecha2024large, fanous2025social}. Malmqvist \citep{malmqvist2024sycophancy} notes that instruction tuning and RLHF may amplify this tendency, encouraging user-pleasing behavior over epistemic robustness.
+
+\paragraph{Susceptibility to Fallacious Reasoning.}
+While early LLMs were susceptible to logical fallacies like base-rate neglect and conjunction errors, newer models have shown improved resistance. Evaluations reveal that systems like GPT-4 outperform prior models on structured logic tasks\citep{yax2024reasoning}, and LOGICOM \citep{payandeh2023logicom} shows their reasoning can adapt in dynamic settings.
+
+However, the same LOGICOM framework demonstrates that GPT-3.5 and GPT-4 are still more likely to be swayed by fallacious arguments (41\% and 69\% more often, respectively) compared to logically sound ones. Our findings diverge from this picture: when fallacious reasoning is forced by design, it significantly harms a model's ability to win debates. This contrast suggests a clear evolution in LLM behavior and highlights the need for updated benchmarks.
+
+\paragraph{Logical Competence and Reasoning Ability.}
+LLMs now demonstrate substantial gains in logical reasoning. Modern models like GPT-4 perform competitively with humans on formal logic, deduction, and arithmetic tasks\citep{yax2024reasoning}. These improvements stem from both scaling and better alignment strategies.
+
+Reasoning ability is increasingly robust in structured evaluations. Contrary to prior studies\citep{payandeh2023logicom}, our results show that newer models are significantly more resistant to fallacious thinking and perform best when reasoning is grounded in logic. This marks a notable shift in model behavior and offers renewed confidence in their application to adversarial and interactive contexts.
+
+\paragraph{Structured Debates and Adversarial Dialogue for Evaluation and Improvement.}
+Structured debate frameworks offer a compelling method for benchmarking and improving LLM reasoning. Assigning models opposing roles surfaces differences in persuasive ability and reasoning strategies\citep{wang2024logic}.
+
+Beyond evaluation, these setups enable training protocols that improve stability. Debate contexts also serve as diagnostic tools, helping expose overconfidence and inconsistency\citep{laban2023flipflop, salecha2024pnas}, and offer a valuable blueprint for fine-tuning models to maintain coherence and factual accuracy in multi-turn interactions.
+
+
+
+
+
+\begin{figure}[t]  %[th!]
+    \subfloat{\label{fig:1a}} 
+    \subfloat{\label{fig:1b}}     
+\includegraphics[width=.45\textwidth]{fig_1}
+\centering
+\caption{\textbf{Can complex episodes with novel sequential or associative information be stored with a one-factor plasticity rule?} \protect\subref{fig:1a}) Left: schematic of a basic non-Hebbian plasticity mechanism, in which synaptic potentiation is triggered only by presynaptic activity. Right: Schematic of a naturalistic episode. \protect\subref{fig:1b}) Left: schematic of a memory trace stored via Hebbian plasticity, in which the synapses connecting co-active neurons strengthen. Right: Example tasks (input pattern detection and spike sequence generation) thought be achievable via Hebbian plasticity after many learning trials \citep{masquelier2009competitive, fiete2010spike}.}
+\label{fig:1}
+\end{figure}
+
+\section*{RESULTS}
+\addcontentsline{toc}{paragraph}{Problem setup:one-shot sequence learning}
+\subsection*{The debating framework}
+\subsection*{Statistics of a single debate across modalities}
+\subsection*{The LLMs debating contest}
+\subsection*{Analysis of LLMs debates}
+
+\section*{DISCUSSION}
+
+\begin{figure*}[t]  %[th!]
+    \subfloat{\label{fig:2a}} 
+    \subfloat{\label{fig:2b}}   
+    \subfloat{\label{fig:2c}} 
+    \subfloat{\label{fig:2d}}   
+    \subfloat{\label{fig:2e}} 
+    \subfloat{\label{fig:2f}}   
+    \subfloat{\label{fig:2g}} 
+    \subfloat{\label{fig:2h}}   
+    \subfloat{\label{fig:2i}}   
+\includegraphics[width=\textwidth]{fig_2}
+\centering
+\caption{\textbf{Episodic memory system using a one-factor plasticity rule}. \protect\subref{fig:2a}) Schematic of a world model state space. \protect\subref{fig:2b}) Encoding network schematic. \protect\subref{fig:2c}) Schematic of odor-tracking-like decoding algorithm. Decoding occurs by following a path of familiarity (dots) through the state space. \protect\subref{fig:2d}) Left: Schematic of plasticity rule that creates the memory trace. When a neuron in the final layer of the encoding network activates, its synaptic weight onto the readout neuron increases by $\eta$. \protect\subref{fig:2e}) Example evolution of the readout weight vector throughout the presentation of an input sequence and response of the readout neuron over the same input sequence. Inputs were random 50-dimensional vectors (Gaussian and i.i.d. across neurons). \protect\subref{fig:2f}) Left: Familiar/unfamiliar state discrimination vs length of input (state) sequence $L$ (assuming all inputs are unique), for different $N$. Middle: as in left but vs activation density in the final layer ($K$) for different $L$. Right: As in left/middle, but as a function of number of timesteps with no input following storage of 50 states, for different $\tau_W$. Left: $K=10, \tau_W = 10000$; middle: $N=2000, \tau_W = 10000$; right: $K=10$. The threshold was $\theta=K-1$ for all panels, with all other parameters as in e. Error bars show standard deviation of accuracy, estimated over 30 simulations.  \protect\subref{fig:2g}) The final memory trace and its interpretation as a connected path through the world model state space. After a state sequence, the readout weights encode the set of states visited, which in the example shown trace out a path through the world model state space (dots represent familiarity). \protect\subref{fig:2h}) Schematic of retrieving an episode. \protect\subref{fig:2i}) Recall accuracy vs path length for three different simulations. Probability of perfect recall was estimated over 300 randomly sampled paths.}
+\label{fig:2}
+\end{figure*}
+
+
+\begin{figure*}[t]  %[th!]
+    \subfloat{\label{fig:3a}} 
+    \subfloat{\label{fig:3b}}   
+    \subfloat{\label{fig:3c}} 
+    \subfloat{\label{fig:3d}} 
+    \subfloat{\label{fig:3e}}   
+\includegraphics[width=1.\textwidth]{fig_3}
+\centering
+\caption{\textbf{Comparison of one-factor plasticity vs STDP in the face of spiking}. \protect\subref{fig:3a}) Left: Schematic of plasticity-event-counting simulation. Right: number of potentiation events surrounding a state transition for either the one-factor rule (Eq. 7-9) or STDP (Eq 10), as a function of the maximum firing rate the pre- and postsynaptic cell can achieve. Each state occurred for 1 second, with only the presynaptic cell active in the first state and only the postsynaptic cell active in the second state. \protect\subref{fig:3b}) 5-state world model used for one-factor vs STDP comparison. \protect\subref{fig:3c}) Schematic of one trial. ($N=1000$ neurons were used for the full simulations). \textcolor{black}{\protect\subref{fig:3d}) Probability of decoding the correct final decision (left or right) after a single trial after storing the trajectory via either the one-factor rule ($\eta = .1, T_r=0.5$s, $\tau_w=1$hr), or STDP ($\Delta T^- = -30$ms, $\Delta T^+ = +20$ms, $\eta^-=-.075, \eta^+=.1$), applied to the weights $\mathbf{w}$ onto the readout neuron during the episode, as different parameters are varied. Except for those varied in the individual plots, simulation parameters were fixed at: $N=1000$, $M=50$, $K=10$, $N_{layer}=4$, $r_{max} = 10$Hz (max. firing rate), $r_0=0.5$Hz (baseline firing rate), $r_{readout} = 2$Hz (readout unit firing rate), $\tau_w=30$min, $r_{th}=2.5$Hz, $T_r=0.5$s (window for estimating pre-synaptic firing rate. \protect\subref{fig:3e}) Rapid potentiation of a synapse via the one-factor rule due to an initial volley of 20 spikes over 1 second (inverted triangle), followed by decay atop low-rate spontaneous firing ($\sim 0.05$Hz), for different decay time constants $\tau_w$.}}
+\label{fig:3}
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{METHODS}
+
+\subsection*{Encoding network}
+\section*{References}
+\bibliography{bibliography}
+
+\section*{Acknowledgments}
+
+\subsection*{Funding}
+
+\subsection*{Author contributions}
+
+\subsection*{Competing interests}
+The authors declare that they have no competing interests.
+
+\subsection*{Data and materials availability}
+All data needed to evaluate the conclusions in the paper are present in the paper and/or the Supplementary Materials.
+
+\newpage
+\clearpage
+\newpage
+
+\newcommand{\beginsupplement}{%
+        \setcounter{table}{0}
+        \renewcommand{\thetable}{S\arabic{table}}%
+        \setcounter{figure}{0}
+        \renewcommand{\thefigure}{S\arabic{figure}}%
+        \setcounter{equation}{0}
+        \renewcommand{\theequation}{S\arabic{equation}}%
+     }
+\beginsupplement
+
+\clearpage
+\setcounter{page}{1}
+\begingroup
+\let\clearpage\relax 
+\onecolumn 
+
+\begin{center}
+\Huge {Supplementary Materials}
+\end{center}
+
+
+
+
+
+
+\paragraph{Agreeability and Stance Switching in LLMs.}
+Recent studies highlight a consistent tendency of large language models (LLMs) to exhibit high agreeability, often manifesting as a willingness to alter their stance in response to user input. This behavior has been documented across a range of state-of-the-art models, including GPT-4, Claude 2, and LLaMA variants \citep{salecha2024large,malmqvist2024sycophancy,laban2023flipflop}.
+
+Laban et al. \citep{laban2023flipflop} introduced the \textit{FlipFlop} benchmark, in which models are prompted with follow-up challenges such as ``Are you sure?'' to assess their robustness. They found that models changed their stance in 46\% of cases on average, with corresponding accuracy declines of up to 17\%. Notably, Claude 2 exhibited a 34\% drop, while GPT-4 was more stable but still affected. These findings underscore a broader pattern of stance reversal under minimal pressure.
+
+This tendency has been linked to social desirability bias. Eichstaedt et al. \citep{salecha2024large} and Fanous et al. \citep{fanous2025social} show that LLMs adjust their responses in personality assessments to align with traits typically viewed as favorable, such as extroversion and agreeableness. Their analysis found that the magnitude of these shifts often exceeds those seen in human respondents. Similarly, Lee et al. \citep{lee2024exploring} observed that LLMs simulate socially desirable answers when taking surveys, suggesting an inherent bias towards user-pleasing outputs.
+
+Malmqvist \citep{malmqvist2024sycophancy} further notes that instruction-tuned models, especially those fine-tuned via reinforcement learning from human feedback (RLHF), are particularly prone to sycophantic behaviors. These models are trained to maximize reward signals often based on human preference, which may inadvertently encourage agreeability over factual accuracy.
+Taken together, this body of work provides robust evidence that agreeability and stance switching are systemic behaviors in LLMs, rooted in both model architecture and training protocols. These behaviors pose important implications for model reliability, especially in adversarial or decision-critical environments.
+
+\paragraph{Susceptibility to Fallacious Reasoning.}
+Large language models have shown varying degrees of vulnerability to fallacious reasoning, particularly in earlier generations. Initial studies identified that models such as GPT-3 and similar architectures were prone to replicating common logical fallacies including base-rate neglect, conjunction fallacies, and belief bias \citep{yax2024reasoning, wang2024logic}.
+
+Yax et al. \citep{yax2024reasoning} conducted a comprehensive evaluation comparing human and LLM performance across a suite of logical reasoning tasks. Their findings indicate that while smaller or earlier models exhibited high rates of fallacious reasoning, newer systems such as GPT-4 demonstrated a marked reduction in error rates. These improvements were attributed to architectural scaling and the use of chain-of-thought prompting techniques that promote stepwise reasoning.
+
+However, more nuanced analyses reveal that susceptibility to fallacy has not been entirely eliminated. In adversarial debate-style benchmarks, models were exposed to both logically sound and fallacious arguments. Wang et al. \citep{wang2024logic} found that GPT-4 was 69\% more likely to be persuaded by fallacious reasoning than by equivalent logical arguments in certain interactive conditions. These findings suggest that although logical reasoning has improved, contextual framing and rhetorical structure can still exploit remaining vulnerabilities in LLM decision-making.
+
+In summary, while contemporary LLMs have made significant strides in reducing classical fallacious thinking, their interactive behavior—especially in persuasive settings—can still be influenced by flawed arguments. This presents a critical area for ongoing research in adversarial robustness and dialogue safety.
+
+\paragraph{Logical Competence and Reasoning Ability}
+Recent developments in large language models have led to notable advances in logical reasoning and structured problem-solving. Early-generation models often relied on superficial statistical correlations, which limited their ability to follow rigorous logical steps. With architectural scaling and the introduction of techniques such as chain-of-thought prompting, newer LLMs demonstrate improved multi-step reasoning and analytic depth \cite{yax2024reasoning}.
+
+Yax et al. \citep{yax2024reasoning} evaluated LLMs on a battery of logic-based and cognitive tasks and found that the most capable models, particularly GPT-4, perform on par with or better than humans in tasks involving formal logic, deductive reasoning, and numerical inference. Their findings suggest that contemporary models are beginning to approximate "system-2" style thinking—deliberate, sequential, and rule-based—rather than merely relying on surface-level pattern matching.
+Wang et al. \citep{wang2024logic} similarly found that the presence of explicit reasoning scaffolds improves logical performance, but absence of structure can cause lapses in coherence.
+
+These findings collectively indicate that while logical reasoning in LLMs has significantly improved, these abilities are context-sensitive and can be destabilized by prompt phrasing or adversarial framing. Ensuring consistency and sound logic under varying dialogue conditions remains a key frontier for ongoing development and evaluation.
+
+
+\paragraph{Persuasive Effectiveness Across Different LLMs.}
+Recent advancements in LLM architecture and training have significantly enhanced models' capacity for logical reasoning and structured problem solving. Early-generation models, such as GPT-2 and GPT-3, often relied on surface-level heuristics or statistical correlations to answer reasoning tasks. However, with the introduction of scaling strategies and techniques like chain-of-thought prompting, newer models demonstrate improved multi-step inference and logical consistency \citep{yax2024reasoning}.
+
+Yax et al. \citep{yax2024reasoning} benchmarked a range of models against cognitive and logic-based tasks traditionally used in psychology. They found that the most recent LLMs—especially GPT-4—performed comparably or even exceeded human baselines in systematic reasoning scenarios. These included syllogisms, deduction problems, and numeracy tasks. Crucially, the study emphasized that performance gains were not merely due to memorization or scale, but also from reasoning-oriented alignment and prompt strategies.
+
+Moreover, Wang et al. \citep{wang2024logic} introduced logic scaffolding as a diagnostic and enhancement tool, revealing both the gains and limits of current reasoning abilities. They found that LLMs perform best when reasoning steps are made explicit and decomposed, confirming the benefits of structured reasoning cues.
+
+Taken together, the literature supports the conclusion that logical competence in LLMs has improved substantially, especially in large, instruction-tuned systems. However, these abilities remain sensitive to interaction context, prompt framing, and adversarial influence—underscoring the need for further work on consistency, verification, and robust evaluation protocols.
+
+\paragraph{Structured Debates and Adversarial Dialogue for Evaluation and Improvement.}
+
+Structured debates and adversarial dialogues have emerged as powerful tools for evaluating and improving the reasoning capabilities of large language models. Unlike static benchmarks, which assess outputs in isolation, debate-based setups simulate dynamic, interactive reasoning that better reflects real-world applications \citep{wang2024logic}.
+
+In these frameworks, two or more LLMs are assigned opposing positions and tasked with persuading one another or a third-party judge. This interaction surfaces nuanced reasoning strategies and exposes model-specific strengths and weaknesses. For example, Wang et al. \citep{wang2024logic} showed that fallacious arguments often falter against logically sound reasoning in structured debates, allowing clearer separation of model competencies.
+
+Beyond training, structured debates also serve as diagnostic tools. Studies have demonstrated that models frequently exhibit overconfidence or fail to revise incorrect positions even when exposed to stronger counterarguments \citep{laban2023flipflop}. Multi-agent dialogue setups have further enabled automated critique and revision cycles, where models iteratively evaluate each other’s claims, improving factual accuracy and reasoning depth \citep{salecha2024pnas}.
+
+Overall, the literature supports the use of structured debates not only as an evaluation benchmark but also as a means of reinforcement. They reveal latent failure modes, enhance consistency under pressure, and provide insights into the comparative strengths of different models in real-time reasoning tasks.
+
+
+
+
+% \section*{Supplementary Materials}
+\floatbarrier
+
+\begin{table*}[ht!]
+\centering
+\begin{tabular}{|c c c c c c c c c|} 
+ \hline
+ Simulation & $M$ & $N$ & $Q$ & $K$ & $G$ & $G_{in}$ & $D$ & $\tau_w$\\ [0.5ex] 
+ \hline\hline
+ \Cref{fig:2d} & 50 & 500 & .1 & 10 & 20 & 10 & 3 & 10000 \\ 
+ \hline
+ \Cref{fig:2e} & 50 & 500 & .1 & 10 & 20 & 10 & 3 & 10000 \\ 
+ \hline
+\end{tabular}
+\caption{Encoding network and plasticity parameters. Dashes indicate parameter was varied during analysis. L, M, R, T, B refer to left, middle, right, top, bottom. \hspace}
+ \label{table:s1}
+\end{table*}
+
+\begin{figure*}[th!]
+    \subfloat{\label{fig:s1a}} 
+    \subfloat{\label{fig:s1b}}       
+\centering
+\includegraphics[width=.5\textwidth]{fig_s1}
+\caption{\textbf{Locality sensitivity of pattern separation by random feed-forward networks.} a. Angle between pair of output vectors $\mathbf{r}$ vs angle between pair of input vectors $\mathbf{u}$ as a function of number of layers in the network. b. As in A but as a function of gain $G$, for a 4-layer network.
+}
+\label{fig:s1}
+\end{figure*}
+\vspace{2.cm}
+
+
+\endgroup
+\end{document}
+

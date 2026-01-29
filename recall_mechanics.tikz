@@ -1,0 +1,110 @@
+% figures/recall_mechanics.tikz
+% Preamble (once):
+% \usepackage{tikz}
+% \usetikzlibrary{arrows.meta,positioning,calc}
+
+\begin{tikzpicture}[
+  font=\small,
+  >=Stealth,
+  node distance=10mm and 16mm
+]
+
+% ---------- Styles ----------
+\tikzset{
+  box/.style={
+    rounded corners=3pt,
+    line width=1pt,
+    inner sep=6pt,
+    align=center
+  },
+  episodic/.style={
+    box,
+    draw=blue!60!black,
+    fill=blue!7
+  },
+  semantic/.style={
+    box,
+    draw=green!55!black,
+    fill=green!9
+  },
+  decision/.style={
+    box,
+    draw=black!70,
+    fill=black!5,
+    line width=1pt
+  },
+  epiArrow/.style={
+    ->,
+    draw=blue!60!black,
+    line width=1pt,
+    shorten <=2pt,
+    shorten >=2pt
+  },
+  semArrow/.style={
+    ->,
+    draw=green!55!black,
+    dashed,
+    line width=1pt,
+    shorten <=2pt,
+    shorten >=2pt
+  },
+  lab/.style={
+    font=\footnotesize,
+    text=black!80,
+    fill=white,
+    inner sep=2pt,
+    rounded corners=2pt
+  }
+}
+
+
+% ---------- Nodes ----------
+\node[episodic, text width=0.9\columnwidth] (start)
+  {\textbf{Start of recall}\\(current episode / list context)};
+
+\node[episodic, text width=0.9\columnwidth, below=of start] (dfs)
+  {\textbf{Episodic tree traversal}\\(probabilistic DFS)};
+
+\node[decision, text width=0.6\columnwidth, below=of dfs] (word)
+  {\textbf{Word recalled}};
+
+\node[semantic, text width=0.45\columnwidth, below left=of word, xshift=12mm, yshift=-6mm] (semexp)
+  {\textbf{Semantic exploration}\\traverse semantic neighbors};
+
+\node[episodic, text width=0.45\columnwidth, below right=of word, xshift=-12mm, yshift=-6mm] (tempcont)
+  {\textbf{Temporal continuation}\\resume episodic traversal};
+
+\node[semantic, text width=0.45\columnwidth, below=of semexp] (semend)
+  {\textbf{Semantic exhausted}\\(no unrecalled neighbors\\or traversal failure)};
+
+\node[
+  episodic,
+  text width=0.4\columnwidth,
+  below=24mm of word,
+  yshift=-6mm
+] (cont)
+{\textbf{Continue recall}};
+
+% ---------- Arrows ----------
+\draw[epiArrow] (start.south) -- (dfs.north);
+\draw[epiArrow] (dfs.south) -- (word.north);
+
+\draw[semArrow] (word.west) -| ($(semexp.north)+(0,6mm)$) -- (semexp.north);
+\draw[epiArrow] (word.east) -| ($(tempcont.north)+(0,6mm)$) -- (tempcont.north);
+
+\draw[semArrow] (semexp.south) -- (semend.north);
+
+\coordinate (semHookX) at ($(cont.west)+(-5mm,0)$);
+\draw[semArrow]
+  (semend.east) -- ++(5mm,0) |- (semHookX) -- (cont.west);
+% \draw[semArrow] (semend.east) -| (cont.west);
+\draw[epiArrow] (tempcont.west) -| (cont.north);
+
+% Loop back on far right (no crossings)
+\coordinate (loopDown)  at ($(cont.south)+(0,-16mm)$);
+\coordinate (loopRight) at ($(dfs.east)+(34mm,0)$);
+
+\draw[epiArrow]
+  (cont.south) -- (loopDown) -- ($(loopRight|-loopDown)$) -- (loopRight) -- (dfs.east);
+
+\end{tikzpicture}
